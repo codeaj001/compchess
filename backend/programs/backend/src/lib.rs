@@ -35,11 +35,35 @@ pub mod backend {
     pub fn settle_game(ctx: Context<SettleGame>, winner: Pubkey) -> Result<()> {
         let game = &mut ctx.accounts.game;
         require!(game.status == GameStatus::Ongoing, GameError::GameNotStarted);
+        require!(
+            winner == game.player_one || game.player_two == Some(winner),
+            GameError::InvalidWinner
+        );
 
         game.winner = Some(winner);
         game.status = GameStatus::Completed;
 
-        msg!("Game settled. Winner: {}", winner);
+        let total_stake = game.stake_amount * 2;
+        let platform_fee = total_stake / 20; // 5% fee
+        let winner_reward = total_stake - platform_fee;
+
+        let seeds = &[b"escrow", game.player_one.as_ref(), &[ctx.bumps.escrow_account]];
+        let signer_seeds = &[&seeds[..]];
+
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.escrow_account.to_account_info(),
+            to: ctx.accounts.winner_token_account.to_account_info(),
+            authority: ctx.accounts.escrow_account.to_account_info(),
+        };
+
+        let cpi_context = CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            cpi_accounts,
+            signer_seeds,
+        );
+        token::transfer(cpi_context, winner_reward)?;
+
+        msg!("Game settled. Winner: {} received {} tokens", winner, winner_reward);
         Ok(())
     }
 }
@@ -52,7 +76,7 @@ pub struct CreateGame<'info> {
     #[account(
         init, 
         payer = player_one, 
-        space = 8 +  // discriminator
+        space = 8 +
         32 +         // player_one (Pubkey)
         33 +         // player_two (Option<Pubkey>)
         8 +          // stake_amount (u64)
@@ -77,7 +101,25 @@ pub struct JoinGame<'info> {
 pub struct SettleGame<'info> {
     #[account(mut)]
     pub game: Account<'info, Game>,
+    
+    /// CHECK: This is a PDA acting as an escrow account, validated by seeds
+    #[account(
+        mut,
+        seeds = [b"escrow", game.player_one.as_ref()],
+        bump
+    )]
+    pub escrow_account: AccountInfo<'info>,
+    
+    /// CHECK: This is a token account; its owner will be validated manually
+    #[account(mut)]
+    pub winner_token_account: AccountInfo<'info>,
+
+    #[account(mut)]
+    pub winner: Signer<'info>,
+
+    pub token_program: Program<'info, Token>,
 }
+
 
 #[account]
 pub struct Game {
@@ -101,4 +143,8 @@ pub enum GameError {
     GameNotWaiting,
     #[msg("Game has not started yet.")]
     GameNotStarted,
+    #[msg("Invalid winner.")]
+    InvalidWinner,
+    #[msg("Invalid winner token account.")]
+    InvalidWinnerAccount,
 }
