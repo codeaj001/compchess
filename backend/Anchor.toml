@@ -4,15 +4,16 @@
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-backend = "8brJBSiwY7xxT3enKcEu7KvMs4h1Xe2hfqXRoW6KRnjr"
+[programs.devnet]
+backend = "7ufJg8P34GqNMXSwKz5XhGisPhmGCeVtMCZt8RtVbCuB"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
+endpoint = "https://api.devnet.solana.com"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
