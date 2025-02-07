@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Crown, Users, Bot, Trophy } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ const Dashboard = () => {
 interface GameModeCardProps {
   title: string;
   description: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: LucideIcon;
   onClick: () => void;
 }
 
