@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Menu, X, ChessKing } from "lucide-react";
+import { Menu, X, Crown } from "lucide-react";
 
 const Index = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,7 +16,7 @@ const Index = () => {
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-2"
             >
-              <ChessKing size={32} className="text-chess-gold" />
+              <Crown size={32} className="text-chess-gold" />
               <span className="text-2xl font-bold">CompChess</span>
             </motion.div>
 
