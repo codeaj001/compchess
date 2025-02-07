@@ -34,7 +34,7 @@ const Dashboard = () => {
             title="Play vs Player"
             description="Challenge other players in real-time matches"
             icon={Users}
-            onClick={() => {}}
+            onClick={() => navigate("/pvp")}
           />
           <GameModeCard
             title="Practice with AI"
