@@ -2,9 +2,22 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Menu, X, Crown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Index = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const connectWallet = async () => {
+    // For now, we'll just show a toast since wallet integration isn't implemented yet
+    toast.info("Wallet connection will be implemented in the next phase");
+  };
+
+  const handleStartPlaying = () => {
+    // For now, we'll show a toast since game routes aren't set up yet
+    toast.info("Game modes will be available soon!");
+  };
 
   return (
     <div className="min-h-screen bg-chess-cream">
@@ -25,7 +38,10 @@ const Index = () => {
               <NavLink href="#features">Features</NavLink>
               <NavLink href="#tournaments">Tournaments</NavLink>
               <NavLink href="#community">Community</NavLink>
-              <button className="btn-primary">
+              <button 
+                className="btn-primary"
+                onClick={connectWallet}
+              >
                 Connect Wallet
               </button>
             </div>
@@ -55,7 +71,10 @@ const Index = () => {
               <NavLink href="#features">Features</NavLink>
               <NavLink href="#tournaments">Tournaments</NavLink>
               <NavLink href="#community">Community</NavLink>
-              <button className="btn-primary w-[200px]">
+              <button 
+                className="btn-primary w-[200px]"
+                onClick={connectWallet}
+              >
                 Connect Wallet
               </button>
             </div>
@@ -84,7 +103,10 @@ const Index = () => {
                 Compete, earn, and become part of a revolutionary chess community.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <button className="btn-primary">
+                <button 
+                  className="btn-primary"
+                  onClick={handleStartPlaying}
+                >
                   Start Playing Now
                 </button>
                 <button className="px-6 py-3 rounded-lg font-semibold 
