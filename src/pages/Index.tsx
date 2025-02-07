@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Menu, X, Crown } from "lucide-react";
@@ -15,8 +14,7 @@ const Index = () => {
   };
 
   const handleStartPlaying = () => {
-    // For now, we'll show a toast since game routes aren't set up yet
-    toast.info("Game modes will be available soon!");
+    navigate("/dashboard");
   };
 
   return (
