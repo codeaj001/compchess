@@ -40,7 +40,7 @@ const Dashboard = () => {
             title="Practice with AI"
             description="Improve your skills against our AI opponent"
             icon={Bot}
-            onClick={() => {}}
+            onClick={() => navigate("/practice")}
           />
           <GameModeCard
             title="Join Tournament"
