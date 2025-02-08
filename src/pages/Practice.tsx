@@ -6,6 +6,7 @@ import { useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const DIFFICULTY_LEVELS = [
   { id: "beginner", name: "Beginner", description: "Perfect for learning the basics" },
@@ -17,6 +18,7 @@ type DifficultyLevel = typeof DIFFICULTY_LEVELS[number]["id"];
 
 const Practice = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>("beginner");
   const [game, setGame] = useState(new Chess());
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -119,33 +121,33 @@ const Practice = () => {
   };
 
   return (
-    <div className="min-h-screen bg-chess-cream p-8">
-      <div className="container mx-auto">
+    <div className="min-h-screen bg-chess-cream p-4 sm:p-8">
+      <div className="container mx-auto max-w-7xl">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-12"
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 sm:mb-12"
         >
           <div className="flex items-center gap-3">
-            <Bot size={32} className="text-chess-gold" />
-            <h1 className="text-3xl font-bold">Practice with AI</h1>
+            <Bot size={isMobile ? 24 : 32} className="text-chess-gold" />
+            <h1 className="text-2xl sm:text-3xl font-bold">Practice with AI</h1>
           </div>
           <button 
             onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-2 text-chess-muted hover:text-chess-dark transition-colors"
+            className="flex items-center gap-2 text-chess-muted hover:text-chess-dark transition-colors text-sm sm:text-base"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={isMobile ? 16 : 20} />
             Back to Dashboard
           </button>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Game Area */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full aspect-square max-w-2xl mx-auto"
+            className="w-full aspect-square max-w-xl mx-auto"
           >
             <div className="relative">
               <Chessboard 
@@ -159,8 +161,8 @@ const Practice = () => {
               />
               {isThinking && (
                 <div className="absolute inset-0 bg-black/10 flex items-center justify-center rounded-lg">
-                  <div className="bg-white p-4 rounded-lg shadow-lg">
-                    <p className="text-lg font-semibold">AI is thinking...</p>
+                  <div className="bg-white p-3 sm:p-4 rounded-lg shadow-lg">
+                    <p className="text-base sm:text-lg font-semibold">AI is thinking...</p>
                   </div>
                 </div>
               )}
@@ -171,26 +173,26 @@ const Practice = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-4 sm:gap-6"
           >
             {!isGameStarted ? (
               <>
-                <h2 className="text-2xl font-semibold mb-6 text-center">Select Difficulty</h2>
-                <div className="grid gap-4">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-center">Select Difficulty</h2>
+                <div className="grid gap-3 sm:gap-4">
                   {DIFFICULTY_LEVELS.map((level) => (
                     <motion.div
                       key={level.id}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`glass-panel p-6 rounded-xl cursor-pointer ${
+                      className={`glass-panel p-4 sm:p-6 rounded-xl cursor-pointer ${
                         selectedDifficulty === level.id 
                           ? "border-2 border-chess-gold" 
                           : "border-2 border-transparent"
                       }`}
                       onClick={() => setSelectedDifficulty(level.id)}
                     >
-                      <h3 className="text-xl font-semibold mb-2">{level.name}</h3>
-                      <p className="text-chess-muted">{level.description}</p>
+                      <h3 className="text-lg sm:text-xl font-semibold mb-2">{level.name}</h3>
+                      <p className="text-chess-muted text-sm sm:text-base">{level.description}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -198,31 +200,31 @@ const Practice = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="glass-panel px-8 py-4 rounded-xl text-xl font-semibold mt-8 mx-auto block"
+                  className="glass-panel px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-lg sm:text-xl font-semibold mt-6 sm:mt-8 mx-auto block"
                   onClick={handleStartGame}
                 >
                   Start Game
                 </motion.button>
               </>
             ) : (
-              <div className="flex flex-col gap-4">
-                <div className="glass-panel p-6 rounded-xl">
-                  <h3 className="text-xl font-semibold mb-4">Game Controls</h3>
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="glass-panel p-4 sm:p-6 rounded-xl">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Game Controls</h3>
                   <button
                     onClick={resetGame}
-                    className="flex items-center gap-2 text-chess-muted hover:text-chess-dark transition-colors"
+                    className="flex items-center gap-2 text-chess-muted hover:text-chess-dark transition-colors text-sm sm:text-base"
                   >
-                    <RotateCcw size={20} />
+                    <RotateCcw size={isMobile ? 16 : 20} />
                     Reset Game
                   </button>
                 </div>
-                <div className="glass-panel p-6 rounded-xl">
-                  <h3 className="text-xl font-semibold mb-4">Current Game</h3>
-                  <p className="text-chess-muted">
+                <div className="glass-panel p-4 sm:p-6 rounded-xl">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Current Game</h3>
+                  <p className="text-chess-muted text-sm sm:text-base">
                     Difficulty: <span className="font-semibold capitalize">{selectedDifficulty}</span>
                   </p>
                   {game.isCheck() && (
-                    <p className="text-red-500 font-semibold mt-2">Check!</p>
+                    <p className="text-red-500 font-semibold mt-2 text-sm sm:text-base">Check!</p>
                   )}
                 </div>
               </div>
