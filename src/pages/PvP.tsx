@@ -1,10 +1,24 @@
 
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Users, ArrowLeft } from "lucide-react";
+import { Users, ArrowLeft, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const PvP = () => {
   const navigate = useNavigate();
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleFindMatch = () => {
+    setIsSearching(true);
+    toast.info("Searching for opponent...");
+
+    // Simulate matchmaking delay
+    setTimeout(() => {
+      setIsSearching(false);
+      toast.error("No opponents found. Please try again later.");
+    }, 3000);
+  };
 
   return (
     <div className="min-h-screen bg-chess-cream p-8">
@@ -36,18 +50,28 @@ const PvP = () => {
         >
           <h2 className="text-2xl font-semibold mb-6">Quick Match</h2>
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="glass-panel px-8 py-4 rounded-xl text-xl font-semibold"
-            onClick={() => {
-              // TODO: Implement matchmaking logic
-              console.log("Finding match...");
-            }}
+            whileHover={{ scale: isSearching ? 1 : 1.05 }}
+            whileTap={{ scale: isSearching ? 1 : 0.95 }}
+            className={`glass-panel px-8 py-4 rounded-xl text-xl font-semibold flex items-center justify-center gap-3 min-w-[200px] ${
+              isSearching ? "opacity-75 cursor-not-allowed" : ""
+            }`}
+            onClick={handleFindMatch}
+            disabled={isSearching}
           >
-            Find Match
+            {isSearching ? (
+              <>
+                <Loader2 className="animate-spin" size={24} />
+                Searching...
+              </>
+            ) : (
+              "Find Match"
+            )}
           </motion.button>
           <p className="mt-4 text-chess-muted">
-            Looking for a quick game? Click to find an opponent at your skill level.
+            {isSearching 
+              ? "Searching for an opponent at your skill level..."
+              : "Looking for a quick game? Click to find an opponent at your skill level."
+            }
           </p>
         </motion.div>
       </div>
