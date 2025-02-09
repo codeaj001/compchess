@@ -1,7 +1,7 @@
 
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Bot, ArrowLeft, RotateCcw } from "lucide-react";
+import { Bot, ArrowLeft, RotateCcw, Shield, Zap, Target } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { Chess } from "chess.js";
@@ -9,9 +9,39 @@ import { Chessboard } from "react-chessboard";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const DIFFICULTY_LEVELS = [
-  { id: "beginner", name: "Beginner", description: "Perfect for learning the basics" },
-  { id: "intermediate", name: "Intermediate", description: "For players who know the rules well" },
-  { id: "advanced", name: "Advanced", description: "Challenging gameplay for experienced players" }
+  { 
+    id: "beginner", 
+    name: "Beginner", 
+    description: "Perfect for learning the basics",
+    icon: Shield,
+    stats: {
+      rating: "800-1200",
+      thinkTime: "Fast",
+      style: "Random moves"
+    }
+  },
+  { 
+    id: "intermediate", 
+    name: "Intermediate", 
+    description: "For players who know the rules well",
+    icon: Target,
+    stats: {
+      rating: "1200-1600",
+      thinkTime: "Medium",
+      style: "Tactical play"
+    }
+  },
+  { 
+    id: "advanced", 
+    name: "Advanced", 
+    description: "Challenging gameplay for experienced players",
+    icon: Zap,
+    stats: {
+      rating: "1600-2000",
+      thinkTime: "Slow",
+      style: "Strategic play"
+    }
+  }
 ] as const;
 
 type DifficultyLevel = typeof DIFFICULTY_LEVELS[number]["id"];
@@ -179,20 +209,39 @@ const Practice = () => {
               <>
                 <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-center">Select Difficulty</h2>
                 <div className="grid gap-3 sm:gap-4">
-                  {DIFFICULTY_LEVELS.map((level) => (
+                  {DIFFICULTY_LEVELS.map(({ id, name, description, icon: Icon, stats }) => (
                     <motion.div
-                      key={level.id}
+                      key={id}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className={`glass-panel p-4 sm:p-6 rounded-xl cursor-pointer ${
-                        selectedDifficulty === level.id 
+                        selectedDifficulty === id 
                           ? "border-2 border-chess-gold" 
                           : "border-2 border-transparent"
                       }`}
-                      onClick={() => setSelectedDifficulty(level.id)}
+                      onClick={() => setSelectedDifficulty(id)}
                     >
-                      <h3 className="text-lg sm:text-xl font-semibold mb-2">{level.name}</h3>
-                      <p className="text-chess-muted text-sm sm:text-base">{level.description}</p>
+                      <div className="flex items-start gap-4">
+                        <Icon size={24} className="text-chess-gold mt-1" />
+                        <div className="flex-1">
+                          <h3 className="text-lg sm:text-xl font-semibold mb-2">{name}</h3>
+                          <p className="text-chess-muted text-sm sm:text-base mb-3">{description}</p>
+                          <div className="grid grid-cols-3 gap-2 text-sm">
+                            <div>
+                              <p className="font-semibold">Rating</p>
+                              <p className="text-chess-muted">{stats.rating}</p>
+                            </div>
+                            <div>
+                              <p className="font-semibold">Speed</p>
+                              <p className="text-chess-muted">{stats.thinkTime}</p>
+                            </div>
+                            <div>
+                              <p className="font-semibold">Style</p>
+                              <p className="text-chess-muted">{stats.style}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </motion.div>
                   ))}
                 </div>

@@ -6,14 +6,24 @@ import { toast } from "sonner";
 
 const Index = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
   const navigate = useNavigate();
 
   const connectWallet = async () => {
-    // For now, we'll just show a toast since wallet integration isn't implemented yet
-    toast.info("Wallet connection will be implemented in the next phase");
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setIsWalletConnected(true);
+      toast.success("Wallet connected successfully!");
+    } catch (error) {
+      toast.error("Failed to connect wallet. Please try again.");
+    }
   };
 
   const handleStartPlaying = () => {
+    if (!isWalletConnected) {
+      toast.error("Please connect your wallet first to start playing");
+      return;
+    }
     navigate("/dashboard");
   };
 
@@ -37,10 +47,11 @@ const Index = () => {
               <NavLink href="#tournaments">Tournaments</NavLink>
               <NavLink href="#community">Community</NavLink>
               <button 
-                className="btn-primary"
+                className={`btn-primary ${isWalletConnected ? 'bg-green-600 hover:bg-green-700' : ''}`}
                 onClick={connectWallet}
+                disabled={isWalletConnected}
               >
-                Connect Wallet
+                {isWalletConnected ? 'Connected' : 'Connect Wallet'}
               </button>
             </div>
 
@@ -70,10 +81,11 @@ const Index = () => {
               <NavLink href="#tournaments">Tournaments</NavLink>
               <NavLink href="#community">Community</NavLink>
               <button 
-                className="btn-primary w-[200px]"
+                className={`btn-primary w-[200px] ${isWalletConnected ? 'bg-green-600 hover:bg-green-700' : ''}`}
                 onClick={connectWallet}
+                disabled={isWalletConnected}
               >
-                Connect Wallet
+                {isWalletConnected ? 'Connected' : 'Connect Wallet'}
               </button>
             </div>
           </motion.div>
@@ -172,7 +184,6 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
 
 const ChessboardPreview = () => (
   <div className="aspect-square bg-gradient-to-br from-chess-gold/20 to-transparent rounded-lg">
-    {/* Placeholder for actual chess board component */}
     <div className="w-full h-full flex items-center justify-center">
       <span className="text-chess-muted">Chess Board Preview</span>
     </div>
