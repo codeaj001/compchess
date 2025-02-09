@@ -106,7 +106,7 @@ const Dashboard = () => {
         </motion.div>
 
         {/* Game Modes Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <GameModeCard
             title="Play vs Player"
             description="Challenge other players in real-time matches"
@@ -118,6 +118,12 @@ const Dashboard = () => {
             description="Improve your skills against our AI opponent"
             icon={Bot}
             onClick={() => navigate("/practice")}
+          />
+          <GameModeCard
+            title="Tournament"
+            description="Compete in tournaments to win prizes"
+            icon={Trophy}
+            onClick={() => navigate("/tournament")}
           />
           <Dialog>
             <DialogTrigger asChild>
