@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,10 +16,19 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "sonner";
 import { useState } from "react";
 
+interface Game {
+  id: string;
+  creator: string;
+  amount: number;
+  createdAt: Date;
+  status: 'open' | 'inProgress' | 'completed';
+}
+
 export const GameModes = () => {
   const navigate = useNavigate();
   const { publicKey } = useWallet();
   const [solAmount, setSolAmount] = useState<string>('0.04');
+  const [games, setGames] = useState<Game[]>([]);
 
   const handleCreateGame = () => {
     const amount = parseFloat(solAmount);
@@ -40,8 +50,13 @@ export const GameModes = () => {
       status: 'open' as const
     };
 
-    // This would typically update a global state or context
+    // Update the games list in local storage
+    const existingGames = JSON.parse(localStorage.getItem('games') || '[]');
+    const updatedGames = [...existingGames, newGame];
+    localStorage.setItem('games', JSON.stringify(updatedGames));
+
     toast.success("Game created successfully!");
+    window.dispatchEvent(new Event('gamesUpdated'));
   };
 
   return (
@@ -78,6 +93,9 @@ export const GameModes = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Game</DialogTitle>
+            <DialogDescription>
+              Set the stake amount for your new game. Minimum stake is 0.04 SOL.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
