@@ -95,7 +95,7 @@ export const AvailableGames = ({ games: propGames }: AvailableGamesProps) => {
               <SelectItem value="all">All amounts</SelectItem>
               <SelectItem value="low">Low (≤ 0.1 SOL)</SelectItem>
               <SelectItem value="medium">Medium (0.1-0.5 SOL)</SelectItem>
-              <SelectItem value="high">High (> 0.5 SOL)</SelectItem>
+              <SelectItem value="high">High (&gt; 0.5 SOL)</SelectItem>
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={setSortBy}>
