@@ -28,7 +28,6 @@ export const GameModes = () => {
   const navigate = useNavigate();
   const { publicKey } = useWallet();
   const [solAmount, setSolAmount] = useState<string>('0.04');
-  const [games, setGames] = useState<Game[]>([]);
 
   const handleCreateGame = () => {
     const amount = parseFloat(solAmount);
