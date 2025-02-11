@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import PvP from "./pages/PvP";
 import Practice from "./pages/Practice";
+import Tournament from "./pages/Tournament";
 import NotFound from "./pages/NotFound";
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
@@ -35,6 +36,7 @@ const App = () => {
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/pvp" element={<PvP />} />
                   <Route path="/practice" element={<Practice />} />
+                  <Route path="/tournament" element={<Tournament />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
