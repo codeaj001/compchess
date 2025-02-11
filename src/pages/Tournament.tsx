@@ -14,33 +14,106 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Tournament {
   id: string;
   name: string;
-  startDate: Date;
-  playersCount: number;
-  maxPlayers: number;
-  entryFee: number;
-  prizePool: number;
+  start_date: string;
+  players_count: number;
+  max_players: number;
+  entry_fee: number;
+  creator_wallet: string;
   status: 'upcoming' | 'inProgress' | 'completed';
-  creator: string;
 }
 
 const Tournament = () => {
   const navigate = useNavigate();
   const { publicKey } = useWallet();
-  const [tournaments, setTournaments] = useState<Tournament[]>(() => {
-    const storedTournaments = localStorage.getItem('tournaments');
-    return storedTournaments ? JSON.parse(storedTournaments).map((t: any) => ({
-      ...t,
-      startDate: new Date(t.startDate)
-    })) : [];
-  });
+  const queryClient = useQueryClient();
   const [newTournament, setNewTournament] = useState({
     name: '',
     maxPlayers: 16,
     entryFee: 0.1
+  });
+
+  // Fetch tournaments
+  const { data: tournaments = [], isLoading } = useQuery({
+    queryKey: ['tournaments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tournaments')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        toast.error("Error loading tournaments");
+        throw error;
+      }
+      return data as Tournament[];
+    }
+  });
+
+  // Create tournament mutation
+  const createTournamentMutation = useMutation({
+    mutationFn: async (tournament: {
+      name: string;
+      maxPlayers: number;
+      entryFee: number;
+    }) => {
+      if (!publicKey) throw new Error("Wallet not connected");
+      
+      const { data, error } = await supabase
+        .from('tournaments')
+        .insert({
+          name: tournament.name,
+          max_players: tournament.maxPlayers,
+          entry_fee: tournament.entryFee,
+          creator_id: (await supabase.auth.getUser()).data.user?.id,
+          creator_wallet: publicKey.toBase58(),
+          start_date: new Date(Date.now() + 86400000).toISOString(),
+          status: 'upcoming'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tournaments'] });
+      toast.success("Tournament created successfully!");
+    },
+    onError: (error) => {
+      toast.error("Failed to create tournament");
+      console.error("Create tournament error:", error);
+    }
+  });
+
+  // Join tournament mutation
+  const joinTournamentMutation = useMutation({
+    mutationFn: async (tournamentId: string) => {
+      if (!publicKey) throw new Error("Wallet not connected");
+      
+      const { error } = await supabase
+        .from('tournament_players')
+        .insert({
+          tournament_id: tournamentId,
+          player_id: (await supabase.auth.getUser()).data.user?.id,
+          wallet_address: publicKey.toBase58()
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tournaments'] });
+      toast.success("Successfully joined tournament!");
+    },
+    onError: (error) => {
+      toast.error("Failed to join tournament");
+      console.error("Join tournament error:", error);
+    }
   });
 
   const handleCreateTournament = () => {
@@ -54,31 +127,16 @@ const Tournament = () => {
       return;
     }
 
-    const tournament: Tournament = {
-      id: Math.random().toString(),
-      name: newTournament.name,
-      startDate: new Date(Date.now() + 86400000), // Starts in 24 hours
-      playersCount: 0,
-      maxPlayers: newTournament.maxPlayers,
-      entryFee: newTournament.entryFee,
-      prizePool: newTournament.entryFee * newTournament.maxPlayers,
-      status: 'upcoming',
-      creator: publicKey.toBase58().slice(0, 4) + '...' + publicKey.toBase58().slice(-4)
-    };
-
-    const updatedTournaments = [...tournaments, tournament];
-    setTournaments(updatedTournaments);
-    localStorage.setItem('tournaments', JSON.stringify(updatedTournaments));
-    toast.success("Tournament created successfully!");
+    createTournamentMutation.mutate(newTournament);
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    }).format(date);
+    }).format(new Date(dateString));
   };
 
   return (
@@ -151,56 +209,68 @@ const Tournament = () => {
         </motion.div>
 
         <div className="grid gap-6">
-          {tournaments.map((tournament) => (
-            <motion.div
-              key={tournament.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="glass-panel p-6 rounded-xl"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-semibold">{tournament.name}</h3>
-                    <span className="text-sm text-chess-muted">by {tournament.creator}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-4 text-sm text-chess-muted">
-                    <div className="flex items-center gap-1">
-                      <Calendar size={16} />
-                      <span>{formatDate(tournament.startDate)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users size={16} />
-                      <span>{tournament.playersCount}/{tournament.maxPlayers} players</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock size={16} />
-                      <span>Entry: {tournament.entryFee} SOL</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div className="text-sm text-chess-muted">Prize Pool</div>
-                    <div className="font-semibold text-chess-gold">{tournament.prizePool} SOL</div>
-                  </div>
-                  <Button onClick={() => {
-                    if (!publicKey) {
-                      toast.error("Please connect your wallet first");
-                      return;
-                    }
-                    toast.success("Successfully joined tournament!");
-                  }}>
-                    Join Tournament
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-          {tournaments.length === 0 && (
+          {isLoading ? (
+            <div className="text-center py-12 text-chess-muted">
+              Loading tournaments...
+            </div>
+          ) : tournaments.length === 0 ? (
             <div className="text-center py-12 text-chess-muted">
               No tournaments available. Create one to get started!
             </div>
+          ) : (
+            tournaments.map((tournament) => (
+              <motion.div
+                key={tournament.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="glass-panel p-6 rounded-xl"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-semibold">{tournament.name}</h3>
+                      <span className="text-sm text-chess-muted">
+                        by {tournament.creator_wallet.slice(0, 4)}...{tournament.creator_wallet.slice(-4)}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-4 text-sm text-chess-muted">
+                      <div className="flex items-center gap-1">
+                        <Calendar size={16} />
+                        <span>{formatDate(tournament.start_date)}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users size={16} />
+                        <span>{tournament.players_count}/{tournament.max_players} players</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock size={16} />
+                        <span>Entry: {tournament.entry_fee} SOL</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-sm text-chess-muted">Prize Pool</div>
+                      <div className="font-semibold text-chess-gold">
+                        {(tournament.entry_fee * tournament.max_players).toFixed(1)} SOL
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={() => {
+                        if (!publicKey) {
+                          toast.error("Please connect your wallet first");
+                          return;
+                        }
+                        joinTournamentMutation.mutate(tournament.id);
+                      }}
+                      disabled={tournament.players_count >= tournament.max_players}
+                    >
+                      {tournament.players_count >= tournament.max_players ? 'Full' : 'Join Tournament'}
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            ))
           )}
         </div>
       </div>

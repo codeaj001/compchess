@@ -9,7 +9,74 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      tournament_players: {
+        Row: {
+          joined_at: string | null
+          player_id: string
+          tournament_id: string
+          wallet_address: string
+        }
+        Insert: {
+          joined_at?: string | null
+          player_id: string
+          tournament_id: string
+          wallet_address: string
+        }
+        Update: {
+          joined_at?: string | null
+          player_id?: string
+          tournament_id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_players_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournaments: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          creator_wallet: string
+          entry_fee: number
+          id: string
+          max_players: number
+          name: string
+          players_count: number | null
+          start_date: string
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          creator_wallet: string
+          entry_fee: number
+          id?: string
+          max_players: number
+          name: string
+          players_count?: number | null
+          start_date: string
+          status: string
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          creator_wallet?: string
+          entry_fee?: number
+          id?: string
+          max_players?: number
+          name?: string
+          players_count?: number | null
+          start_date?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
