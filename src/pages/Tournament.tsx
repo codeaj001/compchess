@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Trophy, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -51,13 +52,18 @@ const Tournament = () => {
     }) => {
       if (!publicKey) throw new Error("Wallet not connected");
 
+      // Generate a consistent UUID based on the wallet address
+      const walletStr = publicKey.toBase58();
+      const creatorId = crypto.randomUUID(); // Generate a UUID for the wallet
+
       const { data, error } = await supabase
         .from('tournaments')
         .insert({
           name: tournament.name,
           max_players: tournament.maxPlayers,
           entry_fee: tournament.entryFee,
-          creator_wallet: publicKey.toBase58(),
+          creator_id: creatorId, // Add the creator_id
+          creator_wallet: walletStr,
           start_date: new Date(Date.now() + 86400000).toISOString(),
           status: 'upcoming'
         })
