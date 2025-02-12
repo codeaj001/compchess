@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Trophy, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -35,6 +34,7 @@ const Tournament = () => {
         .order('created_at', { ascending: false });
       
       if (error) {
+        console.error("Error fetching tournaments:", error);
         toast.error("Error loading tournaments");
         throw error;
       }
@@ -51,13 +51,17 @@ const Tournament = () => {
     }) => {
       if (!publicKey) throw new Error("Wallet not connected");
       
+      // First get the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
         .from('tournaments')
         .insert({
           name: tournament.name,
           max_players: tournament.maxPlayers,
           entry_fee: tournament.entryFee,
-          creator_id: (await supabase.auth.getUser()).data.user?.id,
+          creator_id: user.id,
           creator_wallet: publicKey.toBase58(),
           start_date: new Date(Date.now() + 86400000).toISOString(),
           status: 'upcoming'
@@ -65,7 +69,10 @@ const Tournament = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Create tournament error:", error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
@@ -73,8 +80,8 @@ const Tournament = () => {
       toast.success("Tournament created successfully!");
     },
     onError: (error) => {
-      toast.error("Failed to create tournament");
       console.error("Create tournament error:", error);
+      toast.error("Failed to create tournament");
     }
   });
 

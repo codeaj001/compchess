@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { UseMutationResult } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -24,13 +25,14 @@ interface CreateTournamentDialogProps {
 
 export const CreateTournamentDialog = ({ createTournamentMutation }: CreateTournamentDialogProps) => {
   const { publicKey } = useWallet();
+  const [open, setOpen] = useState(false);
   const [newTournament, setNewTournament] = useState({
     name: '',
     maxPlayers: 16,
     entryFee: 0.1
   });
 
-  const handleCreateTournament = () => {
+  const handleCreateTournament = async () => {
     if (!publicKey) {
       toast.error("Please connect your wallet first");
       return;
@@ -41,11 +43,26 @@ export const CreateTournamentDialog = ({ createTournamentMutation }: CreateTourn
       return;
     }
 
+    // Get the current user's ID before creating the tournament
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast.error("Please sign in to create a tournament");
+      return;
+    }
+
     createTournamentMutation.mutate(newTournament);
+    setOpen(false); // Close dialog on successful creation
+    // Reset form
+    setNewTournament({
+      name: '',
+      maxPlayers: 16,
+      entryFee: 0.1
+    });
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="flex items-center gap-2">
           <Plus size={20} />
