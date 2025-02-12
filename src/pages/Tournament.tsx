@@ -52,9 +52,7 @@ const Tournament = () => {
     }) => {
       if (!publicKey) throw new Error("Wallet not connected");
 
-      // Generate a consistent UUID based on the wallet address
       const walletStr = publicKey.toBase58();
-      const creatorId = crypto.randomUUID(); // Generate a UUID for the wallet
 
       const { data, error } = await supabase
         .from('tournaments')
@@ -62,9 +60,8 @@ const Tournament = () => {
           name: tournament.name,
           max_players: tournament.maxPlayers,
           entry_fee: tournament.entryFee,
-          creator_id: creatorId, // Add the creator_id
           creator_wallet: walletStr,
-          start_date: new Date(Date.now() + 86400000).toISOString(),
+          start_date: new Date(Date.now() + 86400000).toISOString(), // 24 hours from now
           status: 'upcoming'
         })
         .select()
@@ -82,7 +79,7 @@ const Tournament = () => {
     },
     onError: (error) => {
       console.error("Create tournament error:", error);
-      toast.error("Failed to create tournament");
+      toast.error("Failed to create tournament. Please make sure your wallet is connected.");
     }
   });
 
@@ -95,8 +92,8 @@ const Tournament = () => {
         .from('tournament_players')
         .insert({
           tournament_id: tournamentId,
-          player_id: (await supabase.auth.getUser()).data.user?.id,
-          wallet_address: publicKey.toBase58()
+          wallet_address: publicKey.toBase58(),
+          player_id: (await supabase.auth.getUser()).data.user?.id
         });
 
       if (error) throw error;
@@ -106,7 +103,7 @@ const Tournament = () => {
       toast.success("Successfully joined tournament!");
     },
     onError: (error) => {
-      toast.error("Failed to join tournament");
+      toast.error("Failed to join tournament. Please make sure your wallet is connected.");
       console.error("Join tournament error:", error);
     }
   });
