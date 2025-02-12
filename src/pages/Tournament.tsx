@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Trophy, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +7,7 @@ import { toast } from "sonner";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { CreateTournamentDialog } from "@/components/tournament/CreateTournamentDialog";
 import { TournamentCard } from "@/components/tournament/TournamentCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Tournament {
   id: string;
@@ -24,6 +24,7 @@ const Tournament = () => {
   const navigate = useNavigate();
   const { publicKey } = useWallet();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   // Fetch tournaments
   const { data: tournaments = [], isLoading } = useQuery({
@@ -125,38 +126,47 @@ const Tournament = () => {
   };
 
   return (
-    <div className="min-h-screen bg-chess-cream p-4 sm:p-8">
-      <div className="container mx-auto">
+    <div className="min-h-screen bg-chess-cream">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8"
         >
           <div className="flex items-center gap-3">
-            <Trophy size={32} className="text-chess-gold" />
-            <h1 className="text-2xl sm:text-3xl font-bold">Tournaments</h1>
+            <Trophy size={isMobile ? 24 : 32} className="text-chess-gold" />
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Tournaments</h1>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <CreateTournamentDialog createTournamentMutation={createTournamentMutation} />
             <button 
               onClick={() => navigate("/dashboard")}
-              className="flex items-center gap-2 text-chess-muted hover:text-chess-dark transition-colors"
+              className="flex items-center justify-center gap-2 text-chess-muted hover:text-chess-dark transition-colors px-4 py-2 rounded-lg border border-chess-muted/20 hover:border-chess-muted/40"
             >
-              <ArrowLeft size={20} />
-              Back to Dashboard
+              <ArrowLeft size={isMobile ? 18 : 20} />
+              {isMobile ? "Back" : "Back to Dashboard"}
             </button>
           </div>
         </motion.div>
 
-        <div className="grid gap-6">
+        <div className="space-y-4 sm:space-y-6">
           {isLoading ? (
-            <div className="text-center py-12 text-chess-muted">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12 text-chess-muted"
+            >
               Loading tournaments...
-            </div>
+            </motion.div>
           ) : tournaments.length === 0 ? (
-            <div className="text-center py-12 text-chess-muted">
-              No tournaments available. Create one to get started!
-            </div>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12 text-chess-muted"
+            >
+              <p className="mb-2">No tournaments available.</p>
+              <p className="text-sm">Create one to get started!</p>
+            </motion.div>
           ) : (
             tournaments.map((tournament) => (
               <TournamentCard
