@@ -53,6 +53,9 @@ const Tournament = () => {
       if (!publicKey) throw new Error("Wallet not connected");
 
       const walletStr = publicKey.toBase58();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) throw new Error("User not authenticated");
 
       const { data, error } = await supabase
         .from('tournaments')
@@ -61,6 +64,7 @@ const Tournament = () => {
           max_players: tournament.maxPlayers,
           entry_fee: tournament.entryFee,
           creator_wallet: walletStr,
+          creator_id: user.id,
           start_date: new Date(Date.now() + 86400000).toISOString(), // 24 hours from now
           status: 'upcoming'
         })
@@ -79,7 +83,7 @@ const Tournament = () => {
     },
     onError: (error) => {
       console.error("Create tournament error:", error);
-      toast.error("Failed to create tournament. Please make sure your wallet is connected.");
+      toast.error("Failed to create tournament. Please make sure your wallet is connected and you are logged in.");
     }
   });
 
@@ -88,12 +92,15 @@ const Tournament = () => {
     mutationFn: async (tournamentId: string) => {
       if (!publicKey) throw new Error("Wallet not connected");
       
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+      
       const { error } = await supabase
         .from('tournament_players')
         .insert({
           tournament_id: tournamentId,
           wallet_address: publicKey.toBase58(),
-          player_id: (await supabase.auth.getUser()).data.user?.id
+          player_id: user.id
         });
 
       if (error) throw error;
@@ -103,7 +110,7 @@ const Tournament = () => {
       toast.success("Successfully joined tournament!");
     },
     onError: (error) => {
-      toast.error("Failed to join tournament. Please make sure your wallet is connected.");
+      toast.error("Failed to join tournament. Please make sure your wallet is connected and you are logged in.");
       console.error("Join tournament error:", error);
     }
   });
