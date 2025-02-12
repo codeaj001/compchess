@@ -6,7 +6,6 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { UseMutationResult } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +31,7 @@ export const CreateTournamentDialog = ({ createTournamentMutation }: CreateTourn
     entryFee: 0.1
   });
 
-  const handleCreateTournament = async () => {
+  const handleCreateTournament = () => {
     if (!publicKey) {
       toast.error("Please connect your wallet first");
       return;
@@ -40,14 +39,6 @@ export const CreateTournamentDialog = ({ createTournamentMutation }: CreateTourn
 
     if (!newTournament.name) {
       toast.error("Please enter a tournament name");
-      return;
-    }
-
-    // Get the current user's ID before creating the tournament
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      toast.error("Please sign in to create a tournament");
       return;
     }
 

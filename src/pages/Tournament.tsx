@@ -50,10 +50,6 @@ const Tournament = () => {
       entryFee: number;
     }) => {
       if (!publicKey) throw new Error("Wallet not connected");
-      
-      // First get the current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error("User not authenticated");
 
       const { data, error } = await supabase
         .from('tournaments')
@@ -61,7 +57,6 @@ const Tournament = () => {
           name: tournament.name,
           max_players: tournament.maxPlayers,
           entry_fee: tournament.entryFee,
-          creator_id: user.id,
           creator_wallet: publicKey.toBase58(),
           start_date: new Date(Date.now() + 86400000).toISOString(),
           status: 'upcoming'
