@@ -63,3 +63,90 @@
            before:rounded-lg before:-z-10;
   }
 }
+
+/* Chessboard container */
+.chessboard {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
+
+/* Chess square styles */
+.chess-square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem; /* Adjust for piece size */
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+/* Light squares */
+.light-square {
+  background-color: #f0d9b5;
+}
+
+/* Dark squares */
+.dark-square {
+  background-color: #b58863;
+}
+
+/* Chess piece styling */
+.piece {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.piece-icon {
+  font-size: 3rem; /* Adjust size for a nice balance */
+  transition: transform 0.3s ease;
+  font-weight: bold;
+}
+
+/* Hover effect for squares */
+.chess-square:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* Light hover effect */
+}
+
+/* Optional: Piece animation */
+.piece-icon {
+  animation: pieceSlideIn 0.3s ease-out;
+}
+
+/* Piece animation */
+@keyframes pieceSlideIn {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chessboard {
+    width: 90%;
+    height: 90%;
+  }
+  .piece-icon {
+    font-size: 2.5rem; /* Adjust piece size on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .chessboard {
+    width: 100%;
+    height: 100%;
+  }
+  .piece-icon {
+    font-size: 2rem; /* Adjust piece size further for small screens */
+  }
+}

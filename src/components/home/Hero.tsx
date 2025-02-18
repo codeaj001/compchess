@@ -1,9 +1,10 @@
+// components/home/Hero.tsx
 
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // If you're using React Router
 import { useWallet } from '@solana/wallet-adapter-react';
 import { toast } from "sonner";
-import { ChessboardPreview } from "./ChessboardPreview";
+import { ChessboardPreview } from "./ChessboardPreview"; // Import your ChessboardPreview component
 
 export const Hero = () => {
   const navigate = useNavigate();
@@ -14,7 +15,8 @@ export const Hero = () => {
       toast.error("Please connect your wallet first to start playing");
       return;
     }
-    navigate("/dashboard");
+    // Redirect to the difficulty selection page
+    navigate("/select-difficulty");
   };
 
   return (
@@ -40,7 +42,7 @@ export const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <button 
                 className="btn-primary"
-                onClick={handleStartPlaying}
+                onClick={handleStartPlaying} // Updated to navigate to difficulty page
               >
                 Start Playing Now
               </button>
